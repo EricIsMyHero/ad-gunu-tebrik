@@ -43,7 +43,3 @@ Bu, ad günlərini qeyd etmək və yaxınlaşan ad günləri barədə push bildi
     ```
 
     Server `http://localhost:3000` ünvanında işə düşəcək.
-
-## Lisenziya
-
-Bu layihə GNU General Public License v3.0 altında lisenziyalaşdırılmışdır. Bu, proqram təminatının sərbəst şəkildə paylaşılmasına və dəyişdirilməsinə icazə verən bir azad proqram lisenziyasıdır .
