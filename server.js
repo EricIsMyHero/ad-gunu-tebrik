@@ -9,11 +9,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.json());
-// DƏYİŞİKLİK BURADADIR: Statik fayllar ana qovluqdan ("./") oxunur
-app.use(express.static('.')); 
+app.use(express.static('.')); // frontend fayllar üçün
 
 // MongoDB qoşulması
 mongoose.connect(process.env.MONGO_URI, {
@@ -24,16 +22,20 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // Mongoose Schema
 const birthdaySchema = new mongoose.Schema({
+    userId: String,   // Hər istifadəçi üçün
     name: String,
     date: String
 });
 
 const Birthday = mongoose.model("Birthday", birthdaySchema);
 
-// GET /api/birthdays – bütün ad günləri
+// GET /api/birthdays – yalnız cari istifadəçinin ad günləri
 app.get("/api/birthdays", async (req, res) => {
     try {
-        const birthdays = await Birthday.find();
+        const userId = req.query.userId;
+        if (!userId) return res.status(400).json({ error: "userId tələb olunur" });
+
+        const birthdays = await Birthday.find({ userId });
         res.json(birthdays);
     } catch (err) {
         res.status(500).json({ error: "Server xətası" });
@@ -43,10 +45,10 @@ app.get("/api/birthdays", async (req, res) => {
 // POST /api/birthdays – yeni ad günü əlavə et
 app.post("/api/birthdays", async (req, res) => {
     try {
-        const { name, date } = req.body;
-        if (!name || !date) return res.status(400).json({ error: "Ad və tarix tələb olunur" });
+        const { userId, name, date } = req.body;
+        if (!userId || !name || !date) return res.status(400).json({ error: "userId, ad və tarix tələb olunur" });
 
-        const newBirthday = new Birthday({ name, date });
+        const newBirthday = new Birthday({ userId, name, date });
         await newBirthday.save();
         res.status(201).json({ success: true, birthday: newBirthday });
     } catch (err) {
