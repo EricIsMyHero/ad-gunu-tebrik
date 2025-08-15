@@ -1,4 +1,5 @@
 const VAPID_PUBLIC_KEY = "BASt6f1XmZe44Y10HFHSekP5qQQzV2yIy1QTO2qhrarM3-LyYKGrJ6o_Ge3VarD484IDckGl2zmMAs8v2-xsI0o";
+const backendUrl = 'https://ad-gunleri-server.onrender.com';
 
 const form = document.getElementById('birthday-form');
 const nameInput = document.getElementById('name');
@@ -46,7 +47,7 @@ notificationBtn.addEventListener('click', async () => {
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
     });
 
-    await fetch('/api/subscribe', {
+    await fetch(`${backendUrl}/api/subscribe`, {
         method: 'POST',
         body: JSON.stringify(subscription),
         headers: { 'Content-Type': 'application/json' },
@@ -60,9 +61,8 @@ notificationBtn.addEventListener('click', async () => {
 // Ad günlərini yüklə və siyahıya əlavə et
 async function loadBirthdays() {
     try {
-       const backendUrl = 'https://ad-gunleri-server.onrender.com'; // Sizin Render URL-iniz
-       const res = await fetch(`${backendUrl}/api/birthdays`);
-       const data = await res.json();
+        const res = await fetch(`${backendUrl}/api/birthdays`);
+        const data = await res.json();
 
         list.innerHTML = '';
         if (!data.length) {
@@ -91,7 +91,7 @@ async function loadBirthdays() {
             delBtn.title = 'Sil';
             delBtn.onclick = async () => {
                 if (confirm(`'${b.name}' adlı ad gününü silmək istədiyinizə əminsiniz?`)) {
-                    await fetch(`/api/birthdays/${b._id}`, { method: 'DELETE' });
+                    await fetch(`${backendUrl}/api/birthdays/${b._id}`, { method: 'DELETE' });
                     loadBirthdays(); // Dərhal yenilə
                 }
             };
@@ -117,7 +117,12 @@ form.addEventListener('submit', async e => {
         return;
     }
 
-    await fetch(`${backendUrl}/api/subscribe`, { ... });
+    await fetch(`${backendUrl}/api/birthdays`, {
+        method: 'POST',
+        body: JSON.stringify({ name, date }),
+        headers: { 'Content-Type': 'application/json' },
+    });
+
     e.target.reset();
     loadBirthdays(); // Dərhal siyahıya əlavə et
 });
