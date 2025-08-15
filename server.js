@@ -29,12 +29,10 @@ const birthdaySchema = new mongoose.Schema({
 
 const Birthday = mongoose.model("Birthday", birthdaySchema);
 
-// GET /api/birthdays – yalnız cari istifadəçinin ad günləri
+// GET /api/birthdays – yalnız istifadəçinin ad günləri
 app.get("/api/birthdays", async (req, res) => {
     try {
-        const userId = req.query.userId;
-        if (!userId) return res.status(400).json({ error: "userId tələb olunur" });
-
+        const { userId } = req.query;
         const birthdays = await Birthday.find({ userId });
         res.json(birthdays);
     } catch (err) {
@@ -45,10 +43,10 @@ app.get("/api/birthdays", async (req, res) => {
 // POST /api/birthdays – yeni ad günü əlavə et
 app.post("/api/birthdays", async (req, res) => {
     try {
-        const { userId, name, date } = req.body;
-        if (!userId || !name || !date) return res.status(400).json({ error: "userId, ad və tarix tələb olunur" });
+        const { name, date, userId } = req.body;
+        if (!name || !date || !userId) return res.status(400).json({ error: "Ad, tarix və istifadəçi tələb olunur" });
 
-        const newBirthday = new Birthday({ userId, name, date });
+        const newBirthday = new Birthday({ name, date, userId });
         await newBirthday.save();
         res.status(201).json({ success: true, birthday: newBirthday });
     } catch (err) {
@@ -56,19 +54,9 @@ app.post("/api/birthdays", async (req, res) => {
     }
 });
 
-// DELETE /api/birthdays/:id – ad gününü sil
-app.delete("/api/birthdays/:id", async (req, res) => {
-    try {
-        const { id } = req.params;
-        const deleted = await Birthday.findByIdAndDelete(id);
-        if (!deleted) return res.status(404).json({ error: "Ad günü tapılmadı" });
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ error: "Server xətası" });
-    }
-});
-
-// Serveri işə sal
-app.listen(PORT, () => {
-    console.log(`🚀 Server http://localhost:${PORT} ünvanında işə düşdü`);
+// Mongoose Schema dəyişir
+const birthdaySchema = new mongoose.Schema({
+    name: String,
+    date: String,
+    userId: String
 });
