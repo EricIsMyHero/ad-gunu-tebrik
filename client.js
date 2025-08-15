@@ -47,16 +47,16 @@ notificationBtn.addEventListener('click', async () => {
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
     });
 
-    await fetch(${backendUrl}/api/subscribe, {
-        method: 'POST',
-        body: JSON.stringify(subscription),
-        headers: { 'Content-Type': 'application/json' },
-    });
-
-    notificationBtn.textContent = 'Bildirişlər aktivdir';
-    notificationBtn.disabled = true;
-    alert('Push bildirişlərinə uğurla abunə oldunuz!');
+    await fetch(`${backendUrl}/api/subscribe`, {
+    method: 'POST',
+    body: JSON.stringify(subscription),
+    headers: { 'Content-Type': 'application/json' },
 });
+
+notificationBtn.textContent = 'Bildirişlər aktivdir';
+notificationBtn.disabled = true;
+alert('Push bildirişlərinə uğurla abunə oldunuz!');
+
 
 // Ad günlərini yüklə və siyahıya əlavə et
 async function loadBirthdays() {
