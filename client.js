@@ -60,7 +60,8 @@ notificationBtn.addEventListener('click', async () => {
 // Ad günlərini yüklə və siyahıya əlavə et
 async function loadBirthdays() {
     try {
-        const res = await fetch('/api/birthdays');
+       const backendUrl = 'https://ad-gunleri-server.onrender.com'; // Sizin Render URL-iniz
+       const res = await fetch(`${backendUrl}/api/birthdays`);
         const data = await res.json();
 
         list.innerHTML = '';
@@ -116,12 +117,7 @@ form.addEventListener('submit', async e => {
         return;
     }
 
-    await fetch('/api/birthdays', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, date }),
-    });
-
+    await fetch(`${backendUrl}/api/subscribe`, { ... });
     e.target.reset();
     loadBirthdays(); // Dərhal siyahıya əlavə et
 });
