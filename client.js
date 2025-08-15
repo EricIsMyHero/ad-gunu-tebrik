@@ -13,9 +13,10 @@ async function registerServiceWorker() {
         try {
             const registration = await navigator.serviceWorker.register('/sw.js');
             console.log('Service Worker qeydiyyatdan keçdi:', registration);
-            
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
+
+            // Əvvəlcədən aktiv olub-olmadığını yoxla
+            const notificationsEnabled = localStorage.getItem('notificationsEnabled');
+            if (notificationsEnabled === 'true') {
                 notificationBtn.textContent = 'Bildirişlər aktivdir';
                 notificationBtn.disabled = true;
             }
@@ -48,20 +49,21 @@ notificationBtn.addEventListener('click', async () => {
     });
 
     await fetch(`${backendUrl}/api/subscribe`, {
-    method: 'POST',
-    body: JSON.stringify(subscription),
-    headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        body: JSON.stringify(subscription),
+        headers: { 'Content-Type': 'application/json' },
+    });
+
+    notificationBtn.textContent = 'Bildirişlər aktivdir';
+    notificationBtn.disabled = true;
+    localStorage.setItem('notificationsEnabled', 'true'); // Yadda saxla
+    alert('Push bildirişlərinə uğurla abunə oldunuz!');
 });
-
-notificationBtn.textContent = 'Bildirişlər aktivdir';
-notificationBtn.disabled = true;
-alert('Push bildirişlərinə uğurla abunə oldunuz!');
-
 
 // Ad günlərini yüklə və siyahıya əlavə et
 async function loadBirthdays() {
     try {
-        const res = await fetch(${backendUrl}/api/birthdays);
+        const res = await fetch(`${backendUrl}/api/birthdays`);
         const data = await res.json();
 
         list.innerHTML = '';
@@ -90,8 +92,8 @@ async function loadBirthdays() {
             delBtn.textContent = 'X';
             delBtn.title = 'Sil';
             delBtn.onclick = async () => {
-                if (confirm('${b.name}' adlı ad gününü silmək istədiyinizə əminsiniz?)) {
-                    await fetch(${backendUrl}/api/birthdays/${b._id}, { method: 'DELETE' });
+                if (confirm(`'${b.name}' adlı ad gününü silmək istədiyinizə əminsiniz?`)) {
+                    await fetch(`${backendUrl}/api/birthdays/${b._id}`, { method: 'DELETE' });
                     loadBirthdays(); // Dərhal yenilə
                 }
             };
@@ -102,7 +104,7 @@ async function loadBirthdays() {
             list.appendChild(card);
         });
     } catch (error) {
-        list.innerHTML = <p>Xəta baş verdi: ${error.message}</p>;
+        list.innerHTML = `<p>Xəta baş verdi: ${error.message}</p>`;
     }
 }
 
@@ -117,7 +119,7 @@ form.addEventListener('submit', async e => {
         return;
     }
 
-    await fetch(${backendUrl}/api/birthdays, {
+    await fetch(`${backendUrl}/api/birthdays`, {
         method: 'POST',
         body: JSON.stringify({ name, date }),
         headers: { 'Content-Type': 'application/json' },
