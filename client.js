@@ -1,5 +1,5 @@
 const VAPID_PUBLIC_KEY = "BASt6f1XmZe44Y10HFHSekP5qQQzV2yIy1QTO2qhrarM3-LyYKGrJ6o_Ge3VarD484IDckGl2zmMAs8v2-xsI0o";
-const backendUrl = 'https://ad-gunleri-server.onrender.com';
+const backendUrl = 'https://ad-gunleri.onrender.com';
 
 const form = document.getElementById('birthday-form');
 const nameInput = document.getElementById('name');
