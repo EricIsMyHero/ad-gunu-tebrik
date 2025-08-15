@@ -12,7 +12,8 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('.')); // frontend fayllar üçün (index.html, style.css, client.js)
+// DƏYİŞİKLİK BURADADIR: Statik fayllar ana qovluqdan ("./") oxunur
+app.use(express.static('.')); 
 
 // MongoDB qoşulması
 mongoose.connect(process.env.MONGO_URI, {
