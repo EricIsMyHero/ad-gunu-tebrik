@@ -14,9 +14,8 @@ async function registerServiceWorker() {
             const registration = await navigator.serviceWorker.register('/sw.js');
             console.log('Service Worker qeydiyyatdan keçdi:', registration);
 
-            // Əvvəlcədən aktiv olub-olmadığını yoxla
-            const notificationsEnabled = localStorage.getItem('notificationsEnabled');
-            if (notificationsEnabled === 'true') {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
                 notificationBtn.textContent = 'Bildirişlər aktivdir';
                 notificationBtn.disabled = true;
             }
@@ -56,7 +55,6 @@ notificationBtn.addEventListener('click', async () => {
 
     notificationBtn.textContent = 'Bildirişlər aktivdir';
     notificationBtn.disabled = true;
-    localStorage.setItem('notificationsEnabled', 'true'); // Yadda saxla
     alert('Push bildirişlərinə uğurla abunə oldunuz!');
 });
 
