@@ -1,4 +1,5 @@
 const VAPID_PUBLIC_KEY = "BASt6f1XmZe44Y10HFHSekP5qQQzV2yIy1QTO2qhrarM3-LyYKGrJ6o_Ge3VarD484IDckGl2zmMAs8v2-xsI0o";
+const backendUrl = 'https://ad-gunleri.onrender.com';
 
 const form = document.getElementById('birthday-form');
 const nameInput = document.getElementById('name');
@@ -6,10 +7,10 @@ const dateInput = document.getElementById('date');
 const list = document.getElementById('birthday-list');
 const notificationBtn = document.getElementById('enable-notifications');
 
-// Sadə userId (localStorage-da saxlanır)
+// Hər istifadəçi üçün unikal ID
 let userId = localStorage.getItem('userId');
 if (!userId) {
-    userId = Date.now().toString(); // sadə random ID
+    userId = crypto.randomUUID();
     localStorage.setItem('userId', userId);
 }
 
@@ -20,19 +21,18 @@ async function registerServiceWorker() {
             const registration = await navigator.serviceWorker.register('/sw.js');
             console.log('Service Worker qeydiyyatdan keçdi:', registration);
 
-            // Əgər əvvəllər bildiriş aktivdirsə
-            if (localStorage.getItem('notificationsEnabled') === 'true') {
+            const isSubscribed = localStorage.getItem('subscribed') === 'true';
+            if (isSubscribed) {
                 notificationBtn.textContent = 'Bildirişlər aktivdir';
                 notificationBtn.disabled = true;
             }
-
         } catch (error) {
             console.error('Service Worker qeydiyyatı uğursuz oldu:', error);
         }
     }
 }
 
-// URL Base64 → Uint8Array
+// URL Base64-ü Uint8Array-ə çevir
 function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -54,29 +54,27 @@ notificationBtn.addEventListener('click', async () => {
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
     });
 
-    await fetch('/api/subscribe', {
+    await fetch(`${backendUrl}/api/subscribe`, {
         method: 'POST',
         body: JSON.stringify(subscription),
         headers: { 'Content-Type': 'application/json' },
     });
 
+    localStorage.setItem('subscribed', 'true');
     notificationBtn.textContent = 'Bildirişlər aktivdir';
     notificationBtn.disabled = true;
-
-    localStorage.setItem('notificationsEnabled', 'true');
     alert('Push bildirişlərinə uğurla abunə oldunuz!');
 });
 
-// Ad günlərini yüklə
+// Ad günlərini yüklə və siyahıya əlavə et
 async function loadBirthdays() {
     try {
-        const res = await fetch(`/api/birthdays?userId=${userId}`);
-        const text = await res.text();
-        const data = JSON.parse(text);
+        const res = await fetch(`${backendUrl}/api/birthdays?userId=${userId}`);
+        const data = await res.json();
 
         list.innerHTML = '';
-        if (data.length === 0) {
-            list.innerHTML = '<p style="text-align:center;">Heç bir ad günü tapılmadı!</p>';
+        if (!data.length) {
+            list.innerHTML = '<p style="text-align:center;">Heç bir ad günü tapılmadı. Yeni birini əlavə edin!</p>';
             return;
         }
 
@@ -101,7 +99,7 @@ async function loadBirthdays() {
             delBtn.title = 'Sil';
             delBtn.onclick = async () => {
                 if (confirm(`'${b.name}' adlı ad gününü silmək istədiyinizə əminsiniz?`)) {
-                    await fetch(`/api/birthdays/${b._id}`, { method: 'DELETE' });
+                    await fetch(`${backendUrl}/api/birthdays/${b._id}`, { method: 'DELETE' });
                     loadBirthdays();
                 }
             };
@@ -111,7 +109,6 @@ async function loadBirthdays() {
             card.appendChild(dateEl);
             list.appendChild(card);
         });
-
     } catch (error) {
         list.innerHTML = `<p>Xəta baş verdi: ${error.message}</p>`;
     }
@@ -122,12 +119,16 @@ form.addEventListener('submit', async e => {
     e.preventDefault();
     const name = nameInput.value.trim();
     const date = dateInput.value;
-    if (!name || !date) { alert("Ad və tarix daxil edin!"); return; }
 
-    await fetch('/api/birthdays', {
+    if (!name || !date) {
+        alert("Ad və tarix daxil edin!");
+        return;
+    }
+
+    await fetch(`${backendUrl}/api/birthdays`, {
         method: 'POST',
+        body: JSON.stringify({ name, date, userId }),
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, name, date }),
     });
 
     e.target.reset();
