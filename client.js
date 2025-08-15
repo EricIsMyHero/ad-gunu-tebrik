@@ -62,7 +62,7 @@ async function loadBirthdays() {
     try {
        const backendUrl = 'https://ad-gunleri-server.onrender.com'; // Sizin Render URL-iniz
        const res = await fetch(`${backendUrl}/api/birthdays`);
-        
+       const data = await res.json();
 
         list.innerHTML = '';
         if (!data.length) {
