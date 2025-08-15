@@ -92,7 +92,7 @@ async function loadBirthdays() {
             delBtn.onclick = async () => {
                 if (confirm(`${b.name} adlı ad gününü silmək istədiyinizə əminsiniz?`)) {
                     await fetch(`${backendUrl}/api/birthdays/${b._id}`, { method: 'DELETE' });
-                    loadBirthdays(); // Dərhal yenilə
+                    loadBirthdays();
                 }
             };
 
@@ -124,7 +124,7 @@ form.addEventListener('submit', async e => {
     });
 
     e.target.reset();
-    loadBirthdays(); // Dərhal siyahıya əlavə et
+    loadBirthdays();
 });
 
 // Səhifə yüklənəndə
